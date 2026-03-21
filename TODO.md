@@ -2,10 +2,6 @@
 
 ## Feature Implementation
 
-- [ ] Implement transaction submission endpoint
-- [ ] Add request validation for transaction fields
-- [ ] Store transactions in SQLite database
-
 - [ ] Implement decision evaluation logic
 - [ ] Return decision and reasons in API response
 
