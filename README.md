@@ -53,18 +53,6 @@ pytest -q
 - `transaction_type` (string)
 - `new_payee` (boolean)
 
-Example request body with response of "review":
-```json
-{
-  "account_id": "acct-123",
-  "amount": 1200.50,
-  "country": "US",
-  "available_balance": 5000.00,
-  "account_status": "active",
-  "transaction_type": "wire",
-  "new_payee": true
-}
-```
 
 ## How To Submit A Transaction
 Send a `POST` request to `/transactions` with JSON body.
