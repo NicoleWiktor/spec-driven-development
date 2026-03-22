@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Transaction
 from ..schemas import TransactionCreate, TransactionResponse
+from ..services.decision_engine import evaluate_transaction
 
 router = APIRouter(tags=["transactions"])
 
@@ -17,11 +18,7 @@ def create_transaction(
     payload: TransactionCreate,
     db: Session = Depends(get_db),
 ) -> Transaction:
-    if payload.amount <= 0:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="amount must be greater than 0",
-        )
+    decision, reasons = evaluate_transaction(payload)
 
     transaction = Transaction(
         account_id=payload.account_id,
@@ -31,6 +28,8 @@ def create_transaction(
         account_status=payload.account_status,
         transaction_type=payload.transaction_type,
         new_payee=payload.new_payee,
+        decision=decision,
+        reasons=reasons,
     )
     db.add(transaction)
     db.commit()

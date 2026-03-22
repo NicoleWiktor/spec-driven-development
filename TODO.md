@@ -2,9 +2,6 @@
 
 ## Feature Implementation
 
-- [ ] Implement decision evaluation logic
-- [ ] Return decision and reasons in API response
-
 - [ ] Implement transaction retrieval endpoint (GET /transactions)
 - [ ] Implement transaction retrieval by ID
 - [ ] Implement filtering by decision
