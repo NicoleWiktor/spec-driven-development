@@ -159,3 +159,29 @@ def test_decision_rejected_returns_only_rejected_transactions(client):
 def test_invalid_decision_filter_returns_error(client):
     response = client.get("/transactions?decision=unknown")
     assert response.status_code == 422
+
+
+def test_transaction_summary_returns_zero_counts_when_empty(client):
+    response = client.get("/transactions/summary")
+    assert response.status_code == 200
+    assert response.json() == {
+        "total": 0,
+        "approved": 0,
+        "review": 0,
+        "rejected": 0,
+    }
+
+
+def test_transaction_summary_returns_correct_counts(client):
+    create_transaction(client, amount=100, country="US")
+    create_transaction(client, country="CA")
+    create_transaction(client, account_status="inactive")
+
+    response = client.get("/transactions/summary")
+    assert response.status_code == 200
+    assert response.json() == {
+        "total": 3,
+        "approved": 1,
+        "review": 1,
+        "rejected": 1,
+    }

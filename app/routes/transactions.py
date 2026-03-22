@@ -23,7 +23,7 @@ def create_transaction(
 ) -> Transaction:
     if payload.amount <= 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=422,
             detail="amount must be greater than 0",
         )
 
@@ -53,7 +53,7 @@ def list_transactions(
 ) -> list[Transaction]:
     if decision is not None and decision not in ALLOWED_DECISIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=422,
             detail="Invalid decision filter. Allowed values: approved, review, rejected.",
         )
 
@@ -61,6 +61,16 @@ def list_transactions(
     if decision is not None:
         query = query.filter(Transaction.decision == decision)
     return query.all()
+
+
+@router.get("/transactions/summary")
+def get_transaction_summary(db: Session = Depends(get_db)) -> dict[str, int]:
+    return {
+        "total": db.query(Transaction).count(),
+        "approved": db.query(Transaction).filter(Transaction.decision == "approved").count(),
+        "review": db.query(Transaction).filter(Transaction.decision == "review").count(),
+        "rejected": db.query(Transaction).filter(Transaction.decision == "rejected").count(),
+    }
 
 
 @router.get("/transactions/{transaction_id}", response_model=TransactionResponse)
