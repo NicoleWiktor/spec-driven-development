@@ -2,10 +2,6 @@
 
 ## Feature Implementation
 
-- [ ] Implement transaction retrieval endpoint (GET /transactions)
-- [ ] Implement transaction retrieval by ID
-- [ ] Implement filtering by decision
-
 ## Testing
 
 - [ ] Add tests for valid transaction submission
