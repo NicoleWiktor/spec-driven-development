@@ -21,6 +21,12 @@ def create_transaction(
     payload: TransactionCreate,
     db: Session = Depends(get_db),
 ) -> Transaction:
+    if payload.amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="amount must be greater than 0",
+        )
+
     decision, reasons = evaluate_transaction(payload)
 
     transaction = Transaction(
@@ -47,7 +53,7 @@ def list_transactions(
 ) -> list[Transaction]:
     if decision is not None and decision not in ALLOWED_DECISIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Invalid decision filter. Allowed values: approved, review, rejected.",
         )
 

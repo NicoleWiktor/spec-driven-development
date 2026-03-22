@@ -6,8 +6,6 @@ def evaluate_transaction(payload: TransactionCreate) -> tuple[str, list[str]]:
 
     if payload.account_status.strip().lower() != "active":
         reject_reasons.append("Rejected: account status is not active.")
-    if payload.amount <= 0:
-        reject_reasons.append("Rejected: amount must be greater than 0.")
     if payload.amount > payload.available_balance:
         reject_reasons.append("Rejected: amount exceeds available balance.")
 
