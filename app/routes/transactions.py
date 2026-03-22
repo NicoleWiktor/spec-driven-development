@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Transaction
-from ..schemas import TransactionCreate, TransactionResponse
+from ..schemas import TransactionCreate, TransactionResponse, TransactionSummaryResponse
 from ..services.decision_engine import evaluate_transaction
 
 router = APIRouter(tags=["transactions"])
@@ -63,7 +63,7 @@ def list_transactions(
     return query.all()
 
 
-@router.get("/transactions/summary")
+@router.get("/transactions/summary", response_model=TransactionSummaryResponse)
 def get_transaction_summary(db: Session = Depends(get_db)) -> dict[str, int]:
     return {
         "total": db.query(Transaction).count(),

@@ -19,3 +19,10 @@ class TransactionResponse(BaseModel):
     reasons: list[str]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TransactionSummaryResponse(BaseModel):
+    total: int
+    approved: int
+    review: int
+    rejected: int
