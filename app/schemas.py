@@ -26,3 +26,7 @@ class TransactionSummaryResponse(BaseModel):
     approved: int
     review: int
     rejected: int
+
+
+class HealthCheckResponse(BaseModel):
+    message: str

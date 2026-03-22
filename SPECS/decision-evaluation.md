@@ -35,12 +35,12 @@ A transaction is approved only if none of the rejection or review rules apply.
   - reasons: a list of human-readable explanations for triggered rules
 
 ## Acceptance Criteria
-- [ ] Inactive accounts are rejected
-- [ ] Transactions exceeding available balance are rejected
+- [X] Inactive accounts are rejected
+- [X] Transactions exceeding available balance are rejected
 
-- [ ] Large transactions are marked for review
-- [ ] International transactions are marked for review
-- [ ] New payee transactions meeting threshold are marked for review
-- [ ] Wire transactions meeting threshold are marked for review
-- [ ] Transactions with no triggered rules are approved
-- [ ] Response includes decision reasons when rules are triggered
+- [X] Large transactions are marked for review
+- [X] International transactions are marked for review
+- [X] New payee transactions meeting threshold are marked for review
+- [X] Wire transactions meeting threshold are marked for review
+- [X] Transactions with no triggered rules are approved
+- [X] Response includes decision reasons when rules are triggered
