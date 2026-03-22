@@ -16,6 +16,14 @@ def create_transaction(client, **overrides):
     return client.post("/transactions", json=build_payload(**overrides))
 
 
+def test_health_check_returns_service_message(client):
+    response = client.get("/")
+    assert response.status_code == 200
+    body = response.json()
+    assert "message" in body
+    assert "running" in body["message"].lower()
+
+
 def test_valid_transaction_submission_succeeds(client):
     response = create_transaction(client)
     assert response.status_code == 201

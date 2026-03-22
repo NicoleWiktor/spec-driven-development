@@ -1,43 +1,130 @@
-# Candidate Assessment: Spec-Driven Development With Codegen Tools
+# Transaction Review Service
 
-This assessment evaluates how you use modern code generation tools (for example `5.2-Codex`, `Claude`, `Copilot`, and similar) to design, build, and test a software application using a spec-driven development pattern. You may build a frontend, a backend, or both.
+This is a backend service that accepts transaction requests and decides whether to approve, review, or reject them based on predefined business rules.
 
-## Goals
-- Build a working application with at least one meaningful feature.
-- Create a testing framework to validate the application.
-- Demonstrate effective use of code generation tools to accelerate delivery.
-- Show clear, maintainable engineering practices.
 
-## Deliverables
-- Application source code in this repository.
-- A test suite and test harness that can be run locally.
-- Documentation that explains how to run the app and the tests.
+It was built using a spec-driven workflow, where each feature was defined before implementation and validated with tests.
 
-## Scope Options
-Pick one:
-- Frontend-only application.
-- Backend-only application.
-- Full-stack application.
+## What It Does
+- Accepts transaction data through an API
+- Applies deterministic rules to evaluate the risk of the transaction
+- Stores transactions in a SQLite database
+- Allows retrieval and filtering of transactions
+- Provides a summary of decisions
 
-Your solution should include at least one real workflow, for example:
-- Create and view a resource.
-- Search or filter data.
-- Persist data in memory or storage.
+## Tech Stack
+- FastAPI
+- SQLAlchemy + SQLite
+- Pydantic
+- Pytest + TestClient
 
-## Rules
-- You must use a code generation tool (for example `5.2-Codex`, `Claude`, or similar). You can use multiple tools.
-- You must build the application and a testing framework for it.
-- The application and tests must run locally.
-- Do not include secrets or credentials in this repository.
+## Run Locally
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-## Evaluation Criteria
-- Working product: Does the app do what it claims?
-- Test coverage: Do tests cover key workflows and edge cases?
-- Engineering quality: Clarity, structure, and maintainability.
-- Use of codegen: How effectively you used tools to accelerate work.
-- Documentation: Clear setup and run instructions.
+Use /docs to explore endpoints.
 
-## What to Submit
-- When you are complete, put up a Pull Request against this repository with your changes.
-- A short summary of your approach and tools used in your PR submission
-- Any additional information or approach that helped you.
+API: `http://127.0.0.1:8000`  
+Docs: `http://127.0.0.1:8000/docs`
+
+SQLite database file is created at `transactions.db`.
+
+## Run Tests
+```bash
+pytest -q
+```
+
+## Main Endpoints
+- `POST /transactions` - create and evaluate a transaction
+- `GET /transactions` - list transactions (optional `?decision=approved|review|rejected`)
+- `GET /transactions/{transaction_id}` - fetch one transaction by ID
+- `GET /transactions/summary` - return aggregate counts by decision
+
+## Request Fields (`POST /transactions`)
+- `account_id` (string)
+- `amount` (number, must be `> 0`)
+- `country` (string)
+- `available_balance` (number)
+- `account_status` (string)
+- `transaction_type` (string)
+- `new_payee` (boolean)
+
+Example request body with response of "review":
+```json
+{
+  "account_id": "acct-123",
+  "amount": 1200.50,
+  "country": "US",
+  "available_balance": 5000.00,
+  "account_status": "active",
+  "transaction_type": "wire",
+  "new_payee": true
+}
+```
+
+## How To Submit A Transaction
+Send a `POST` request to `/transactions` with JSON body.
+
+Valid example:
+```json
+{
+  "account_id": "acct-100",
+  "amount": 250.0,
+  "country": "US",
+  "available_balance": 1000.0,
+  "account_status": "active",
+  "transaction_type": "card",
+  "new_payee": false
+}
+```
+
+Invalid example (`amount <= 0`):
+```json
+{
+  "account_id": "acct-100",
+  "amount": 0,
+  "country": "US",
+  "available_balance": 1000.0,
+  "account_status": "active",
+  "transaction_type": "card",
+  "new_payee": false
+}
+```
+
+Expected error response:
+```json
+{
+  "detail": "amount must be greater than 0"
+}
+```
+
+## Decision Rules
+
+### Rejected
+- `account_status != "active"`
+- `amount > available_balance`
+
+### Review (only if not rejected)
+- `amount >= 5000`
+- `country != "US"`
+- `new_payee == true` and `amount >= 1000`
+- `transaction_type == "wire"` and `amount >= 2000`
+
+### Approved
+- no rules triggered
+
+## Response Shape
+- `POST /transactions` and retrieval endpoints return:
+  - `id` (int)
+  - `decision` (`approved` | `review` | `rejected`)
+  - `reasons` (list of strings)
+
+## Error Behavior
+- Invalid body/field types: `422`
+- `amount <= 0`: `422` with `"amount must be greater than 0"`
+- Invalid decision filter: `422`
+- Unknown transaction ID: `404` with `"Transaction not found."`
