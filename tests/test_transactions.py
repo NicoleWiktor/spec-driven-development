@@ -112,9 +112,11 @@ def test_get_transaction_by_id_returns_correct_record(client):
     assert response.json()["id"] == first["id"]
 
 
-def test_non_existent_transaction_id_returns_404(client):
-    response = client.get("/transactions/999999")
+def test_transaction_retrieval_by_missing_id_returns_404(client):
+    response = client.get("/transactions/9999")
     assert response.status_code == 404
+    body = response.json()
+    assert body["detail"] == "Transaction not found."
 
 
 def test_decision_approved_returns_only_approved_transactions(client):
@@ -157,8 +159,10 @@ def test_decision_rejected_returns_only_rejected_transactions(client):
 
 
 def test_invalid_decision_filter_returns_error(client):
-    response = client.get("/transactions?decision=unknown")
+    response = client.get("/transactions?decision=blah")
     assert response.status_code == 422
+    body = response.json()
+    assert "invalid decision filter" in body["detail"].lower()
 
 
 def test_transaction_summary_returns_zero_counts_when_empty(client):
@@ -185,3 +189,5 @@ def test_transaction_summary_returns_correct_counts(client):
         "review": 1,
         "rejected": 1,
     }
+
+
